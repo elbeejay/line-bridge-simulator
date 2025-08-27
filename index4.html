@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Line Bridge Simulator - Test Page</title>
-    <script src="utils.js"></script>
+    <script src="js/utils.js"></script>
 </head>
 <body>
     <h1>Testing Utility Functions</h1>
@@ -38,34 +38,34 @@
         const line10 = { x1: 10, y1: 20, x2: 100, y2: 20 };
         console.log('Test 5 (Parallel):', intersects(line9, line10) === false ? 'PASS' : 'FAIL');
 
-        console.log('\n--- Running Tests for checkConnectivity() ---');
-        const CANVAS_WIDTH = 500;
+        console.log('\n--- Running Tests for checkForBridge() ---');
+        const CANVAS_DIMENSIONS = { width: 500, height: 400 };
 
         // Test case 6: Simple connected bridge
         const bridgeLines = [
             { x1: 0, y1: 50, x2: 100, y2: 50 },      // Touches left
             { x1: 90, y1: 40, x2: 200, y2: 150 },   // Intersects with first
-            { x1: 190, y1: 140, x2: CANVAS_WIDTH, y2: 200 } // Intersects with second, touches right
+            { x1: 190, y1: 140, x2: CANVAS_DIMENSIONS.width, y2: 200 } // Intersects with second, touches right
         ];
-        console.log('Test 6 (Connected Bridge):', checkConnectivity(bridgeLines, CANVAS_WIDTH) === true ? 'PASS' : 'FAIL');
+        console.log('Test 6 (Connected Bridge):', checkForBridge(bridgeLines, CANVAS_DIMENSIONS).pathFound === true ? 'PASS' : 'FAIL');
 
         // Test case 7: No connected bridge
         const noBridgeLines = [
             { x1: 0, y1: 50, x2: 100, y2: 50 },      // Touches left
             { x1: 200, y1: 100, x2: 300, y2: 100 },  // Does not intersect
-            { x1: 400, y1: 150, x2: CANVAS_WIDTH, y2: 150 } // Touches right
+            { x1: 400, y1: 150, x2: CANVAS_DIMENSIONS.width, y2: 150 } // Touches right
         ];
-        console.log('Test 7 (No Bridge):', checkConnectivity(noBridgeLines, CANVAS_WIDTH) === false ? 'PASS' : 'FAIL');
+        console.log('Test 7 (No Bridge):', checkForBridge(noBridgeLines, CANVAS_DIMENSIONS).pathFound === false ? 'PASS' : 'FAIL');
 
         // Test case 8: Empty lines array
-        console.log('Test 8 (Empty Array):', checkConnectivity([], CANVAS_WIDTH) === false ? 'PASS' : 'FAIL');
+        console.log('Test 8 (Empty Array):', checkForBridge([], CANVAS_DIMENSIONS).pathFound === false ? 'PASS' : 'FAIL');
 
         // Test case 9: Lines touch left, but no path to right
         const leftOnlyLines = [
             { x1: 0, y1: 50, x2: 100, y2: 50 },
             { x1: 0, y1: 150, x2: 100, y2: 150 }
         ];
-        console.log('Test 9 (Left-touching only):', checkConnectivity(leftOnlyLines, CANVAS_WIDTH) === false ? 'PASS' : 'FAIL');
+        console.log('Test 9 (Left-touching only):', checkForBridge(leftOnlyLines, CANVAS_DIMENSIONS).pathFound === false ? 'PASS' : 'FAIL');
 
     </script>
 </body>
