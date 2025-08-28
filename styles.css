@@ -1,0 +1,73 @@
+body {
+    font-family: sans-serif;
+    text-align: center;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 20px;
+}
+
+h1, h2 {
+    color: #333;
+}
+
+#simulation-container {
+    margin: 20px auto;
+    border: 2px solid #333;
+    width: 800px; /* Match canvas width */
+}
+
+#controls-container {
+    width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    text-align: left;
+}
+
+.control-group {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.control-group label {
+    width: 150px;
+    font-weight: bold;
+}
+
+.control-group input[type="number"] {
+    width: 70px;
+    margin-right: 10px;
+}
+
+.control-group input[type="range"] {
+    flex-grow: 1;
+}
+
+#simulation-actions {
+    text-align: center;
+    margin-top: 20px;
+}
+
+#simulation-actions button {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 0 10px;
+    cursor: pointer;
+}
+
+#status-container {
+    width: 800px;
+    margin: 20px auto;
+    padding: 15px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    text-align: left;
+}
+
+#status-container p {
+    margin: 5px 0;
+}

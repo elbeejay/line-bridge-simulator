@@ -4,40 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Line Bridge Simulator</title>
-    <style>
-        body { font-family: sans-serif; text-align: center; }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Line Bridge Simulator - Module 1 Test</h1>
-    <p>This page is for testing the Simulation Engine (`engine.js`).</p>
-    <p>Open the browser's developer console to see logs and interact with the `engine` object.</p>
+    <h1>Line Bridge Simulator</h1>
 
-    <!-- Scripts are loaded here. Order is important. -->
-    <!-- `utils.js` is needed by `engine.js`, so it comes first. -->
-    <script src="utils.js"></script>
-    <script src="engine.js"></script>
+    <div id="simulation-container">
+        <canvas id="simulation-canvas" width="800" height="600"></canvas>
+    </div>
 
-    <script>
-        // This script block runs after the other scripts have loaded.
-        console.log("--- Running Initialization Test ---");
+    <div id="controls-container">
+        <h2>Controls</h2>
 
-        // 1. Create an instance of the simulation engine.
-        const canvasSize = { width: 800, height: 600 };
-        const params = { minLength: 20, maxLength: 100, minAngle: 0, maxAngle: 360 };
-        const engine = new SimulationEngine(canvasSize, params);
+        <div class="control-group">
+            <label for="min-length">Min Line Length:</label>
+            <input type="number" id="min-length" value="10">
+            <input type="range" id="min-length-slider" min="1" max="100" value="10">
+        </div>
 
-        console.log("SimulationEngine instance created successfully:", engine);
+        <div class="control-group">
+            <label for="max-length">Max Line Length:</label>
+            <input type="number" id="max-length" value="50">
+            <input type="range" id="max-length-slider" min="1" max="200" value="50">
+        </div>
 
-        // 2. You can now interact with the `engine` object in the console.
-        // Try these commands in your browser's developer console:
-        // > engine.isRunning = true
-        // > engine.runStep()
-        // > console.log(engine.lines) // See the generated line
-        // > engine.runStep()
-        // > console.log(engine.lines) // See the second generated line
+        <div class="control-group">
+            <label for="min-angle">Min Line Angle:</label>
+            <input type="number" id="min-angle" value="0">
+            <input type="range" id="min-angle-slider" min="0" max="360" value="0">
+        </div>
 
-        console.log("--- Test Complete. You can now use the 'engine' object in the console. ---");
-    </script>
+        <div class="control-group">
+            <label for="max-angle">Max Line Angle:</label>
+            <input type="number" id="max-angle" value="360">
+            <input type="range" id="max-angle-slider" min="0" max="360" value="360">
+        </div>
+
+        <div id="simulation-actions">
+            <button id="start-button">Start</button>
+            <button id="pause-button">Pause</button>
+            <button id="reset-button">Reset</button>
+        </div>
+    </div>
+
+    <div id="status-container">
+        <h2>Simulation Status</h2>
+        <p>Line Count: <span id="line-count">0</span></p>
+        <p>Result: <span id="result-message">Not started</span></p>
+    </div>
+
+    <script src="js/utils.js" type="module"></script>
+    <script src="js/renderer.js" type="module"></script>
+    <script src="js/engine.js" type="module"></script>
+    <script src="js/ui.js" type="module"></script>
 </body>
 </html>
