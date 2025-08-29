@@ -1,4 +1,4 @@
-// Module 1: Simulation Engine
+// Module 1: 🧑‍💻 Simulation Engine (`engine.js`)
 
 class SimulationEngine {
     /**
