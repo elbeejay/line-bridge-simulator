@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetButton = document.getElementById('reset-button');
     const lineCountDisplay = document.getElementById('line-count');
     const resultMessageDisplay = document.getElementById('result-message');
+    const bridgeAreaSizeDisplay = document.getElementById('bridge-area-size');
 
     // Parameter Controls
     const minLengthInput = document.getElementById('min-length');
@@ -35,6 +36,11 @@ document.addEventListener('DOMContentLoaded', () => {
         maxAngle: parseInt(maxAngleInput.value),
     };
     const engine = new SimulationEngine({ width: canvas.width, height: canvas.height }, initialParams);
+
+    // Update the newly added display for the red area size on initial load
+    if (engine.bridgeArea) {
+        bridgeAreaSizeDisplay.textContent = `${engine.bridgeArea.width} x ${engine.bridgeArea.height}`;
+    }
 
     // --- Main Application State & Logic ---
     let animationFrameId = null;
@@ -78,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         engine.simulationParameters = getParametersFromUI(); // Re-read UI params
         updateDisplays();
         resultMessageDisplay.textContent = 'Not started';
+
         render(ctx, canvas, engine, engine.bridgeArea); // Re-render the cleared state
     }
 

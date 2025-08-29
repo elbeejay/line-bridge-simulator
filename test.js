@@ -39,33 +39,34 @@ const line10 = { x1: 10, y1: 20, x2: 100, y2: 20 };
 runTest('Test 5 (Parallel)', intersects(line9, line10) === false);
 
 console.log('\n--- Running Tests for checkForBridge() ---');
-const CANVAS_DIMENSIONS = { width: 500, height: 400 };
+// The bridgeArea object needs x, y, width, and height properties.
+const BRIDGE_AREA = { x: 0, y: 0, width: 500, height: 400 };
 
 // Test case 6: Simple connected bridge
 const bridgeLines = [
     { x1: 0, y1: 50, x2: 100, y2: 50 },      // Touches left
     { x1: 90, y1: 40, x2: 200, y2: 150 },   // Intersects with first
-    { x1: 190, y1: 140, x2: CANVAS_DIMENSIONS.width, y2: 200 } // Intersects with second, touches right
+    { x1: 190, y1: 140, x2: BRIDGE_AREA.width, y2: 200 } // Intersects with second, touches right
 ];
-runTest('Test 6 (Connected Bridge)', checkForBridge(bridgeLines, CANVAS_DIMENSIONS).pathFound === true);
+runTest('Test 6 (Connected Bridge)', checkForBridge(bridgeLines, BRIDGE_AREA).pathFound === true);
 
 // Test case 7: No connected bridge
 const noBridgeLines = [
     { x1: 0, y1: 50, x2: 100, y2: 50 },      // Touches left
     { x1: 200, y1: 100, x2: 300, y2: 100 },  // Does not intersect
-    { x1: 400, y1: 150, x2: CANVAS_DIMENSIONS.width, y2: 150 } // Touches right
+    { x1: 400, y1: 150, x2: BRIDGE_AREA.width, y2: 150 } // Touches right
 ];
-runTest('Test 7 (No Bridge)', checkForBridge(noBridgeLines, CANVAS_DIMENSIONS).pathFound === false);
+runTest('Test 7 (No Bridge)', checkForBridge(noBridgeLines, BRIDGE_AREA).pathFound === false);
 
 // Test case 8: Empty lines array
-runTest('Test 8 (Empty Array)', checkForBridge([], CANVAS_DIMENSIONS).pathFound === false);
+runTest('Test 8 (Empty Array)', checkForBridge([], BRIDGE_AREA).pathFound === false);
 
 // Test case 9: Lines touch left, but no path to right
 const leftOnlyLines = [
     { x1: 0, y1: 50, x2: 100, y2: 50 },
     { x1: 0, y1: 150, x2: 100, y2: 150 }
 ];
-runTest('Test 9 (Left-touching only)', checkForBridge(leftOnlyLines, CANVAS_DIMENSIONS).pathFound === false);
+runTest('Test 9 (Left-touching only)', checkForBridge(leftOnlyLines, BRIDGE_AREA).pathFound === false);
 
 if (failures > 0) {
     console.error(`\n${failures} test(s) failed.`);
