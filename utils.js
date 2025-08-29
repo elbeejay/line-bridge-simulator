@@ -86,10 +86,15 @@ function checkForBridge(lines, canvasDimensions) {
     const leftStarters = [];
     const rightFinishers = new Set();
 
+    // A small tolerance is necessary for floating-point comparisons to the edge.
+    const tolerance = 1e-9;
+
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-        const touchesLeft = line.x1 === 0 || line.x2 === 0;
-        const touchesRight = line.x1 === canvasWidth || line.x2 === canvasWidth;
+        // A line is a "starter" if one of its endpoints is on or very near the left edge.
+        const touchesLeft = line.x1 <= tolerance || line.x2 <= tolerance;
+        // A line is a "finisher" if one of its endpoints is on or very near the right edge.
+        const touchesRight = line.x1 >= canvasWidth - tolerance || line.x2 >= canvasWidth - tolerance;
 
         if (touchesLeft) {
             leftStarters.push(i);

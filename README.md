@@ -50,12 +50,12 @@ Here are the specific, modular tasks required to build the simulator. They are g
 
 *This is the brain of the application. It runs the simulation and manages all the data.*
 
-  - [ ] **Task 1.1: Initialize Simulation State**
+  - [x] **Task 1.1: Initialize Simulation State**
 
       - **Description**: Create a function or class that initializes and holds the simulation's state.
       - **State should include**: `lines` (an array of line objects), `isRunning` (boolean), `lineCount` (number), `simulationParameters` (object containing length/angle ranges), and `canvasDimensions` (width, height).
 
-  - [ ] **Task 1.2: Implement the Main Simulation Loop**
+  - [x] **Task 1.2: Implement the Main Simulation Loop**
 
       - **Description**: Create a `runStep()` function that executes a single step of the simulation. This involves generating one line, adding it to the state, and then checking for a connection.
       - **Logic**:
@@ -65,7 +65,7 @@ Here are the specific, modular tasks required to build the simulator. They are g
         4.  Call the connectivity checker (Task 4.2).
         5.  If a connection is found, set `isRunning` to `false`.
 
-  - [ ] **Task 1.3: Develop Random Line Generation Logic**
+  - [x] **Task 1.3: Develop Random Line Generation Logic**
 
       - **Description**: Create a function that generates a new line object based on the current parameters. A key challenge is ensuring the *entire* line is within the canvas boundaries.
       - **Input**: `simulationParameters`, `canvasDimensions`.
@@ -75,7 +75,7 @@ Here are the specific, modular tasks required to build the simulator. They are g
 
 *This module connects the user to the simulation engine through DOM elements.*
 
-  - [ ] **Task 2.1: Build HTML Structure for Controls**
+  - [x] **Task 2.1: Build HTML Structure for Controls**
 
       - **Description**: Create the HTML for all user inputs and displays.
       - **Elements**:
@@ -85,7 +85,7 @@ Here are the specific, modular tasks required to build the simulator. They are g
           - A display area for the current line count.
           - A display area for the final result message.
 
-  - [ ] **Task 2.2: Implement Control Event Listeners**
+  - [x] **Task 2.2: Implement Control Event Listeners**
 
       - **Description**: Write the JavaScript to handle user interactions. When a user clicks a button or changes a slider, this module will call the appropriate function in the Simulation Engine.
       - **Example**: The "Start" button's event listener should trigger a function that sets `engine.isRunning` to `true` and repeatedly calls `engine.runStep()`. The "Reset" button should call a function that clears the engine's state.
@@ -94,15 +94,15 @@ Here are the specific, modular tasks required to build the simulator. They are g
 
 *This module is solely responsible for drawing. It is a "dumb" component that just visualizes the data it's given.*
 
-  - [ ] **Task 3.1: Set Up the Canvas**
+  - [x] **Task 3.1: Set Up the Canvas**
 
       - **Description**: Create a function to initialize the HTML `<canvas>` element, setting its dimensions and getting its 2D drawing context.
 
-  - [ ] **Task 3.2: Create a Line Drawing Function**
+  - [x] **Task 3.2: Create a Line Drawing Function**
 
       - **Description**: Write a simple function that takes a line object (`{ x1, y1, x2, y2 }`) and a color, and draws it on the canvas.
 
-  - [ ] **Task 3.3: Implement the Main Render Function**
+  - [x] **Task 3.3: Implement the Main Render Function**
 
       - **Description**: Create a `render()` function that draws the entire simulation state.
       - **Logic**:
@@ -110,7 +110,7 @@ Here are the specific, modular tasks required to build the simulator. They are g
         2.  Draw the rectangular boundary/background.
         3.  Loop through the `engine.state.lines` array and use the line drawing function (Task 3.2) to draw each one.
 
-  - [ ] **Task 3.4 (Stretch Goal): Implement Path Highlighting**
+  - [x] **Task 3.4 (Stretch Goal): Implement Path Highlighting**
 
       - **Description**: After the simulation completes, the Connectivity Module (Task 4.2) should be able to return the specific lines that form the bridge. Create a function in the renderer to re-draw just those lines in a different color (e.g., bright red).
 
@@ -118,14 +118,14 @@ Here are the specific, modular tasks required to build the simulator. They are g
 
 *These are pure, mathematical functions that can be developed and tested in complete isolation.*
 
-  - [ ] **Task 4.1: Implement Line Segment Intersection Logic**
+  - [x] **Task 4.1: Implement Line Segment Intersection Logic**
 
       - **Description**: Write a function that determines if two line segments intersect. This is a classic computational geometry problem.
       - **Input**: Two line objects, e.g., `intersects(lineA, lineB)`.
       - **Output**: `true` or `false`.
       - **Note**: This function must be robust and handle all edge cases (collinear, touching at an endpoint, etc.).
 
-  - [ ] **Task 4.2: Develop the Graph Connectivity Algorithm**
+  - [x] **Task 4.2: Develop the Graph Connectivity Algorithm**
 
       - **Description**: This is the most complex utility. This function will determine if a left-to-right bridge exists.
       - **Input**: An array of all `lines` and the `canvasDimensions`.
