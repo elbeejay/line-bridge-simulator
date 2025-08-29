@@ -72,13 +72,12 @@ function onSegment(p, q, r) {
 // Task 4.2: Develop the Graph Connectivity Algorithm
 
 /**
- * Checks if a set of lines forms a bridge from the left to the right side of the canvas.
+ * Checks if a set of lines forms a bridge from the left to the right side of a given area.
  * @param {Array<object>} lines - An array of line objects ({ x1, y1, x2, y2 }).
- * @param {object} canvasDimensions - The dimensions of the canvas ({ width, height }).
- * @returns {boolean} - True if a connecting bridge exists, false otherwise.
+ * @param {object} bridgeArea - The area to check for a bridge within ({ x, y, width, height }).
+ * @returns {object} - An object with `pathFound` (boolean) and `path` (array of line indices).
  */
-function checkForBridge(lines, canvasDimensions) {
-    const { width: canvasWidth } = canvasDimensions;
+function checkForBridge(lines, bridgeArea) {
     if (lines.length === 0) {
         return { pathFound: false, path: [] };
     }
@@ -86,15 +85,18 @@ function checkForBridge(lines, canvasDimensions) {
     const leftStarters = [];
     const rightFinishers = new Set();
 
+    const leftBoundary = bridgeArea.x;
+    const rightBoundary = bridgeArea.x + bridgeArea.width;
+
     // A small tolerance is necessary for floating-point comparisons to the edge.
     const tolerance = 1e-9;
 
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         // A line is a "starter" if one of its endpoints is on or very near the left edge.
-        const touchesLeft = line.x1 <= tolerance || line.x2 <= tolerance;
+        const touchesLeft = line.x1 <= leftBoundary + tolerance || line.x2 <= leftBoundary + tolerance;
         // A line is a "finisher" if one of its endpoints is on or very near the right edge.
-        const touchesRight = line.x1 >= canvasWidth - tolerance || line.x2 >= canvasWidth - tolerance;
+        const touchesRight = line.x1 >= rightBoundary - tolerance || line.x2 >= rightBoundary - tolerance;
 
         if (touchesLeft) {
             leftStarters.push(i);

@@ -19,6 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const maxLengthSlider = document.getElementById('max-length-slider');
     const minAngleSlider = document.getElementById('min-angle-slider');
     const maxAngleSlider = document.getElementById('max-angle-slider');
+    const bridgeMarginInput = document.getElementById('bridge-margin');
+    const bridgeMarginSlider = document.getElementById('bridge-margin-slider');
 
     // --- Canvas & Renderer Setup ---
     const { canvas, ctx } = setupCanvas('simulation-canvas');
@@ -33,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         maxLength: parseInt(maxLengthInput.value),
         minAngle: parseInt(minAngleInput.value),
         maxAngle: parseInt(maxAngleInput.value),
+        bridgeMargin: parseInt(bridgeMarginInput.value),
     };
     const engine = new SimulationEngine({ width: canvas.width, height: canvas.height }, initialParams);
 
@@ -58,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        render(ctx, canvas, engine); // Render the current state
+        render(ctx, canvas, engine, engine.bridgeArea); // Render the current state
         animationFrameId = requestAnimationFrame(mainLoop);
     }
 
@@ -78,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
         engine.simulationParameters = getParametersFromUI(); // Re-read UI params
         updateDisplays();
         resultMessageDisplay.textContent = 'Not started';
-        render(ctx, canvas, engine); // Re-render the cleared state
+        render(ctx, canvas, engine, engine.bridgeArea); // Re-render the cleared state
     }
 
     /**
@@ -91,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
             maxLength: parseInt(maxLengthInput.value),
             minAngle: parseInt(minAngleInput.value),
             maxAngle: parseInt(maxAngleInput.value),
+            bridgeMargin: parseInt(bridgeMarginInput.value),
         };
     }
 
@@ -122,12 +126,17 @@ document.addEventListener('DOMContentLoaded', () => {
     setupSliderSync(maxLengthSlider, maxLengthInput);
     setupSliderSync(minAngleSlider, minAngleInput);
     setupSliderSync(maxAngleSlider, maxAngleInput);
+    setupSliderSync(bridgeMarginSlider, bridgeMarginInput);
 
     // Update engine parameters when any control changes
-    [minLengthInput, maxLengthInput, minAngleInput, maxAngleInput,
-     minLengthSlider, maxLengthSlider, minAngleSlider, maxAngleSlider].forEach(input => {
+    [minLengthInput, maxLengthInput, minAngleInput, maxAngleInput, bridgeMarginInput,
+     minLengthSlider, maxLengthSlider, minAngleSlider, maxAngleSlider, bridgeMarginSlider].forEach(input => {
         input.addEventListener('change', () => {
             engine.simulationParameters = getParametersFromUI();
+            // The engine needs to be notified to recalculate the bridge area
+            if (engine.updateBridgeArea) {
+                engine.updateBridgeArea();
+            }
         });
     });
 
