@@ -1,4 +1,4 @@
-const { intersects, checkForBridge } = require('./js/utils.js');
+const { intersects, checkForBridge } = require('./utils.js');
 
 let failures = 0;
 
