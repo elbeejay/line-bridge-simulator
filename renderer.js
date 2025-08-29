@@ -30,13 +30,27 @@ function drawLine(ctx, line, color = 'black') {
 }
 
 /**
+ * Draws the boundary of the bridge area.
+ * @param {CanvasRenderingContext2D} ctx The canvas rendering context.
+ * @param {object} bridgeArea The area to draw ({ x, y, width, height }).
+ */
+function drawBridgeArea(ctx, bridgeArea) {
+    if (!bridgeArea) return;
+    ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)'; // Red, semi-transparent
+    ctx.lineWidth = 2;
+    ctx.strokeRect(bridgeArea.x, bridgeArea.y, bridgeArea.width, bridgeArea.height);
+    // Reset line width for other drawing
+    ctx.lineWidth = 1;
+}
+
+/**
  * Renders the entire simulation state.
  * @param {CanvasRenderingContext2D} ctx The canvas rendering context.
  * @param {HTMLCanvasElement} canvas The canvas element.
- * @param {object} state The simulation state.
- * @param {Array<{x1: number, y1: number, x2: number, y2: number}>} state.lines The array of lines to draw.
+ * @param {object} state The simulation state, containing the lines.
+ * @param {object} bridgeArea The area where the bridge is calculated.
  */
-function render(ctx, canvas, state) {
+function render(ctx, canvas, state, bridgeArea) {
     // 1. Clear the canvas completely
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -44,7 +58,10 @@ function render(ctx, canvas, state) {
     ctx.fillStyle = '#f0f0f0';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 3. Loop through the lines and draw each one
+    // 3. Draw the bridge area
+    drawBridgeArea(ctx, bridgeArea);
+
+    // 4. Loop through the lines and draw each one
     if (state && state.lines) {
         state.lines.forEach(line => {
             drawLine(ctx, line);

@@ -14,6 +14,20 @@ class SimulationEngine {
             minAngle: 0,
             maxAngle: 360
         };
+
+        // Define the inner "bridge area" with a margin.
+        const margin = {
+            x: this.canvasDimensions.width * 0.1,
+            y: this.canvasDimensions.height * 0.1,
+        };
+
+        this.bridgeArea = {
+            x: margin.x,
+            y: margin.y,
+            width: this.canvasDimensions.width - 2 * margin.x,
+            height: this.canvasDimensions.height - 2 * margin.y,
+        };
+
         this.reset();
     }
 
@@ -86,7 +100,7 @@ class SimulationEngine {
         // 3. Check if a bridge has been formed.
         // This function will be defined in `utils.js`.
         // The check can be computationally expensive, so we only run it when a new line is added.
-        const bridgeResult = checkForBridge(this.lines, this.canvasDimensions);
+        const bridgeResult = checkForBridge(this.lines, this.bridgeArea);
 
         // 4. If a bridge exists, stop the simulation.
         if (bridgeResult.pathFound) {
