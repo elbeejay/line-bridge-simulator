@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        render(ctx, canvas, engine); // Render the current state
+        render(ctx, canvas, engine, engine.bridgeArea); // Render the current state
         animationFrameId = requestAnimationFrame(mainLoop);
     }
 
@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
         engine.simulationParameters = getParametersFromUI(); // Re-read UI params
         updateDisplays();
         resultMessageDisplay.textContent = 'Not started';
-        render(ctx, canvas, engine); // Re-render the cleared state
+        render(ctx, canvas, engine, engine.bridgeArea); // Re-render the cleared state
     }
 
     /**
