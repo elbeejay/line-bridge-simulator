@@ -7,16 +7,21 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Line Bridge Simulator</h1>
-
-    <div id="simulation-container">
-        <canvas id="simulation-canvas" width="800" height="600"></canvas>
+    <div id="header-container">
+        <h1>Line Bridge Simulator</h1>
+        <p class="simulation-description">
+            This simulation demonstrates the concept of connectivity in a random graph. Lines are randomly generated within the canvas. A 'bridge' is formed when a continuous path of intersecting lines connects the left and right sides of the designated red area. The simulation stops when a bridge is successfully built.
+        </p>
     </div>
 
-    <div id="controls-container">
-        <h2>Controls</h2>
+    <div id="main-container">
+        <div id="simulation-container">
+            <canvas id="simulation-canvas" width="800" height="600"></canvas>
+        </div>
 
-        <div class="control-group">
+        <div id="controls-container">
+            <h2>Controls</h2>
+            <div class="control-group">
             <p>Red Area (pixels): <span id="bridge-area-size">N/A</span></p>
         </div>
 
