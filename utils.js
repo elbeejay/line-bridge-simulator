@@ -126,19 +126,27 @@ function checkForBridge(lines, bridgeArea) {
 
     const queue = [...leftStarters];
     const visited = new Set(leftStarters);
+    const parent = new Map(); // To reconstruct the path
 
     while (queue.length > 0) {
         const currentIndex = queue.shift();
 
         if (rightFinishers.has(currentIndex)) {
-            // For now, we don't need to return the path, but we could in the future.
-            return { pathFound: true, path: [] }; // Bridge found!
+            // --- Path Reconstruction ---
+            const path = [];
+            let current = currentIndex;
+            while (current !== undefined) {
+                path.unshift(current);
+                current = parent.get(current);
+            }
+            return { pathFound: true, path: path }; // Bridge found!
         }
 
         const neighbors = adj.get(currentIndex);
         for (const neighborIndex of neighbors) {
             if (!visited.has(neighborIndex)) {
                 visited.add(neighborIndex);
+                parent.set(neighborIndex, currentIndex); // Set parent
                 queue.push(neighborIndex);
             }
         }
