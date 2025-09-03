@@ -150,3 +150,38 @@ Here are the specific, modular tasks required to build the simulator. They are g
     cd line-bridge-simulator
     ```
 3.  **Open `index.html` in your browser.** There are no build steps required for this vanilla JS project.
+
+-----
+
+## 🔬 Opportunities for Future Development
+
+This project provides a solid foundation for exploring percolation theory, but there are many opportunities for enhancement and further development. The following suggestions are grouped by category.
+
+### **Feature Enhancements & Bugfixes**
+
+*   **Complete Path Highlighting**: The `checkForBridge` function in `utils.js` currently returns an empty array for the path. This should be updated to perform a path reconstruction (e.g., by storing parent pointers during the BFS traversal) and return the actual line indices that form the bridge. The corresponding code in `ui.js` can then be uncommented to highlight the successful path.
+*   **Cluster Visualization**: Instead of only highlighting the final bridge, visualize all clusters of connected lines with different colors. This would give a much richer view of the percolation process.
+*   **Boundary Condition Toggling**: Allow the user to change the boundary conditions. For example, check for a bridge from top-to-bottom, or from a corner to the opposite corner.
+
+### **Performance Optimizations**
+
+*   **Incremental Connectivity Checks**: The current `checkForBridge` function re-builds the entire graph and re-checks all intersections on every step (an O(n²) operation, where n is the number of lines). This can be optimized significantly:
+    *   **Union-Find Data Structure**: An ideal solution for this problem is to use a Union-Find (or Disjoint Set Union) data structure. Each line can be a node in the set. When a new line is added, check for intersections *only with existing lines*. For each intersection found, perform a `union` operation on the sets containing the two lines. A bridge is formed when a line touching the left boundary is in the same set as a line touching the right boundary.
+    *   **Quadtrees**: For a very large number of lines, the intersection detection itself can be optimized by using a spatial partitioning data structure like a Quadtree. This would allow the simulation to quickly find which lines are near a new line, avoiding the need to check against every other line on the canvas.
+
+### **Code Refinements & Robustness**
+
+*   **Efficient Line Generation**: The `_generateRandomLine` method in `engine.js` uses a `while` loop that could be slow if the line length parameters are large relative to the canvas size. A more robust approach would be to first pick a random point *within a margin* of the canvas, then calculate the valid range of angles that would keep the line in-bounds, and finally pick a random angle from that valid range.
+*   **Input Validation**: The UI in `index.html` and `ui.js` should be updated to include input validation. For example, prevent the minimum length from being greater than the maximum length.
+*   **Dependency Management**: For a larger project, explicitly list dependencies (even if just for testing, like Node.js) and consider using a package manager like npm to manage them.
+
+### **Advanced Simulation Features**
+
+*   **Data Logging and Analysis**: Run the simulation multiple times automatically ("headless" mode) with a given set of parameters. Log the number of lines required for each run and calculate statistics like the mean, median, and variance. This would allow for a more rigorous exploration of the percolation threshold.
+*   **Different Element Shapes**: Modify the simulation to use other shapes instead of lines, such as circles, squares, or ellipses, to see how the geometry of the elements affects the percolation threshold.
+*   **Configurable Bridge Area**: Allow the user to resize or move the "bridge area" dynamically to explore how its dimensions affect the results.
+
+### **Expanded Testing**
+
+*   **`checkForBridge` Path Reconstruction**: Add tests to verify that the path returned by `checkForBridge` is correct and contains the right lines in the right order.
+*   **UI & Engine Tests**: While more complex, adding basic tests for the UI (e.g., ensuring button clicks trigger the right engine functions) and the `SimulationEngine` state machine would improve reliability. Frameworks like Jest (with JSDOM) could be used for this.
