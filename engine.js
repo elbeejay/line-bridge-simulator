@@ -38,6 +38,7 @@ class SimulationEngine {
         this.lines = [];
         this.isRunning = false;
         this.lineCount = 0;
+        this.connectingPath = [];
     }
 
     /**
@@ -106,7 +107,7 @@ class SimulationEngine {
         if (bridgeResult.pathFound) {
             this.isRunning = false;
             // (Optional) Store the path for highlighting later.
-            // this.connectingPath = bridgeResult.path;
+            this.connectingPath = bridgeResult.path;
             console.log(`Bridge formed with ${this.lineCount} lines!`);
         }
     }

@@ -56,15 +56,17 @@ document.addEventListener('DOMContentLoaded', () => {
             // If a bridge was found in the last step, stop the simulation
             if (!engine.isRunning) {
                 resultMessageDisplay.textContent = `Bridge formed with ${engine.lineCount} lines!`;
-                // (Optional) Highlight the final path
-                // const bridge = checkForBridge(engine.lines, engine.canvasDimensions);
-                // if (bridge.pathFound) {
-                //     highlightPath(ctx, bridge.path.map(i => engine.lines[i]));
-                // }
             }
         }
 
         render(ctx, canvas, engine, engine.bridgeArea); // Render the current state
+
+        // Highlight the final path if one was found.
+        if (engine.connectingPath && engine.connectingPath.length > 0) {
+            const pathLines = engine.connectingPath.map(i => engine.lines[i]);
+            highlightPath(ctx, pathLines, 'blue');
+        }
+
         animationFrameId = requestAnimationFrame(mainLoop);
     }
 
