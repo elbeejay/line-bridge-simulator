@@ -159,7 +159,6 @@ This project provides a solid foundation for exploring percolation theory, but t
 
 ### **Feature Enhancements & Bugfixes**
 
-*   **Complete Path Highlighting**: The `checkForBridge` function in `utils.js` currently returns an empty array for the path. This should be updated to perform a path reconstruction (e.g., by storing parent pointers during the BFS traversal) and return the actual line indices that form the bridge. The corresponding code in `ui.js` can then be uncommented to highlight the successful path.
 *   **Cluster Visualization**: Instead of only highlighting the final bridge, visualize all clusters of connected lines with different colors. This would give a much richer view of the percolation process.
 *   **Boundary Condition Toggling**: Allow the user to change the boundary conditions. For example, check for a bridge from top-to-bottom, or from a corner to the opposite corner.
 
@@ -183,5 +182,4 @@ This project provides a solid foundation for exploring percolation theory, but t
 
 ### **Expanded Testing**
 
-*   **`checkForBridge` Path Reconstruction**: Add tests to verify that the path returned by `checkForBridge` is correct and contains the right lines in the right order.
 *   **UI & Engine Tests**: While more complex, adding basic tests for the UI (e.g., ensuring button clicks trigger the right engine functions) and the `SimulationEngine` state machine would improve reliability. Frameworks like Jest (with JSDOM) could be used for this.
