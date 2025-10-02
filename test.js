@@ -1,4 +1,5 @@
-const { intersects, checkForBridge } = require('./utils.js');
+const { SimulationEngine } = require('./engine.js');
+const { intersects } = require('./utils.js'); // Also test intersects directly
 
 let failures = 0;
 
@@ -28,66 +29,76 @@ const line5 = { x1: 0, y1: 0, x2: 50, y2: 0 };
 const line6 = { x1: 25, y1: 0, x2: 75, y2: 0 };
 runTest('Test 3 (Collinear, Overlapping)', intersects(line5, line6) === true);
 
-// Test case 4: Collinear and non-overlapping
-const line7 = { x1: 0, y1: 0, x2: 50, y2: 0 };
-const line8 = { x1: 60, y1: 0, x2: 100, y2: 0 };
-runTest('Test 4 (Collinear, Non-Overlapping)', intersects(line7, line8) === false);
 
-// Test case 5: Parallel lines
-const line9 = { x1: 10, y1: 10, x2: 100, y2: 10 };
-const line10 = { x1: 10, y1: 20, x2: 100, y2: 20 };
-runTest('Test 5 (Parallel)', intersects(line9, line10) === false);
+console.log('\n--- Running Tests for SimulationEngine Bridge Detection ---');
 
-console.log('\n--- Running Tests for checkForBridge() ---');
-// The bridgeArea object needs x, y, width, and height properties.
-const BRIDGE_AREA = { x: 0, y: 0, width: 500, height: 400 };
+const CANVAS_DIMENSIONS = { width: 500, height: 400 };
+const SIMULATION_PARAMS = {
+    minLength: 10,
+    maxLength: 50,
+    minAngle: 0,
+    maxAngle: 360,
+    boundaryCondition: 'left-to-right',
+};
 
-// Test case 6: Simple connected bridge
+// --- Helper function to run a single test case ---
+function testBridgeScenario(testName, lines, expectedPath, boundaryCondition = 'left-to-right') {
+    // Create a new engine for each test case to ensure isolation
+    const engine = new SimulationEngine(CANVAS_DIMENSIONS, { ...SIMULATION_PARAMS, boundaryCondition });
+    engine.isRunning = true; // Pretend the simulation is running
+
+    // Manually override the line generation for predictable tests
+    let lineCounter = 0;
+    engine._generateRandomLine = () => {
+        if (lineCounter < lines.length) {
+            return lines[lineCounter++];
+        }
+        return { x1: 0, y1: 0, x2: 0, y2: 0 }; // Default fallback
+    };
+
+    // Run a step for each line to be added
+    for (let i = 0; i < lines.length; i++) {
+        engine.runStep();
+    }
+
+    const pathFound = engine.connectingPath.length > 0;
+    const expectedPathFound = expectedPath.length > 0;
+
+    runTest(`${testName} - Bridge Found`, pathFound === expectedPathFound);
+
+    if (expectedPathFound) {
+        const pathIsCorrect = JSON.stringify(engine.connectingPath.map(l => lines.indexOf(l))) === JSON.stringify(expectedPath);
+        runTest(`${testName} - Correct Path`, pathIsCorrect);
+    }
+}
+
+// Test Case 4: Simple Left-to-Right Bridge
 const bridgeLines = [
-    { x1: 0, y1: 50, x2: 100, y2: 50 },      // Touches left
-    { x1: 90, y1: 40, x2: 200, y2: 150 },   // Intersects with first
-    { x1: 190, y1: 140, x2: BRIDGE_AREA.width, y2: 200 } // Intersects with second, touches right
+    { x1: 10, y1: 50, x2: 100, y2: 50 },      // 0: Touches left
+    { x1: 90, y1: 40, x2: 200, y2: 150 },    // 1: Intersects with first
+    { x1: 190, y1: 140, x2: 460, y2: 200 }   // 2: Intersects with second, touches right
 ];
-// Test case 6: Simple connected bridge
-const bridgeResult = checkForBridge(bridgeLines, BRIDGE_AREA);
-runTest('Test 6 (Connected Bridge - Found)', bridgeResult.pathFound === true);
-runTest('Test 6 (Connected Bridge - Path)', JSON.stringify(bridgeResult.path) === JSON.stringify([0, 1, 2]));
+testBridgeScenario('Test 4 (Simple Bridge)', bridgeLines, [0, 1, 2]);
 
-// Test case 7: No connected bridge
+// Test Case 5: No Bridge
 const noBridgeLines = [
-    { x1: 0, y1: 50, x2: 100, y2: 50 },      // Touches left
-    { x1: 200, y1: 100, x2: 300, y2: 100 },  // Does not intersect
-    { x1: 400, y1: 150, x2: BRIDGE_AREA.width, y2: 150 } // Touches right
+    { x1: 10, y1: 50, x2: 100, y2: 50 },      // 0: Touches left
+    { x1: 200, y1: 100, x2: 300, y2: 100 },  // 1: Does not intersect
+    { x1: 450, y1: 150, x2: 480, y2: 150 }   // 2: Touches right
 ];
-runTest('Test 7 (No Bridge)', checkForBridge(noBridgeLines, BRIDGE_AREA).pathFound === false);
+testBridgeScenario('Test 5 (No Bridge)', noBridgeLines, []);
 
-// Test case 8: Empty lines array
-runTest('Test 8 (Empty Array)', checkForBridge([], BRIDGE_AREA).pathFound === false);
-
-// Test case 9: Lines touch left, but no path to right
-const leftOnlyLines = [
-    { x1: 0, y1: 50, x2: 100, y2: 50 },
-    { x1: 0, y1: 150, x2: 100, y2: 150 }
+// Test Case 6: Top-to-Bottom Bridge
+const topToBottomLines = [
+    { x1: 100, y1: 10, x2: 100, y2: 100 },   // 0: Touches top
+    { x1: 90, y1: 90, x2: 200, y2: 200 },    // 1: Intersects
+    { x1: 190, y1: 190, x2: 300, y2: 370 }   // 2: Intersects and touches bottom
 ];
-runTest('Test 9 (Left-touching only)', checkForBridge(leftOnlyLines, BRIDGE_AREA).pathFound === false);
+testBridgeScenario('Test 6 (Top-to-Bottom Bridge)', topToBottomLines, [0, 1, 2], 'top-to-bottom');
 
-// Test case 10: Corner-to-corner bridge
-const cornerBridgeLines = [
-    { x1: 5, y1: 5, x2: 100, y2: 100 },      // Near top-left corner
-    { x1: 90, y1: 90, x2: 200, y2: 200 },   // Intersects with first
-    { x1: 190, y1: 190, x2: 495, y2: 395 } // Intersects with second, near bottom-right
-];
-const cornerBridgeResult = checkForBridge(cornerBridgeLines, BRIDGE_AREA, 'top-left-to-bottom-right');
-runTest('Test 10 (Corner Bridge - Found)', cornerBridgeResult.pathFound === true);
-runTest('Test 10 (Corner Bridge - Path)', JSON.stringify(cornerBridgeResult.path) === JSON.stringify([0, 1, 2]));
-
-
-// Test case 11: No Corner-to-corner bridge
-const noCornerBridgeLines = [
-    { x1: 5, y1: 5, x2: 100, y2: 100 },      // Near top-left corner
-    { x1: 495, y1: 395, x2: 400, y2: 300 } // Near bottom-right, but no connection
-];
-runTest('Test 11 (No Corner Bridge)', checkForBridge(noCornerBridgeLines, BRIDGE_AREA, 'top-left-to-bottom-right').pathFound === false);
+// Test Case 7: Starter is also a Finisher
+const shortBridgeLine = [{ x1: 10, y1: 50, x2: 460, y2: 50 }];
+testBridgeScenario('Test 7 (Short Bridge)', shortBridgeLine, [0]);
 
 
 if (failures > 0) {

@@ -38,7 +38,7 @@ To ensure modularity and enable parallel development, the application will be br
 3.  **Rendering Engine (`renderer.js`)**: Responsible for all drawing on the HTML canvas. It takes the state from the Simulation Engine and visually represents it. It doesn't know how the state is generated; it only knows how to draw it.
 4.  **Utility Modules (`utils.js`)**: A set of pure, standalone functions for performing complex calculations.
       * **Intersection Module**: A function to determine if two line segments intersect.
-      * **Connectivity Module**: A function that takes a list of lines and determines if a left-to-right bridge exists using a graph traversal algorithm (like BFS or DFS).
+      * **Connectivity Module**: A `UnionFind` class and associated logic in the `SimulationEngine` to incrementally track connected components. It efficiently determines if a bridge exists without rebuilding a graph on every step.
 
 This separation of concerns means a developer can work on the intersection logic without touching any UI code, or another can refine the canvas drawing without understanding the core simulation loop.
 
@@ -129,15 +129,15 @@ Here are the specific, modular tasks required to build the simulator. They are g
 
   - [x] **Task 4.2: Develop the Graph Connectivity Algorithm**
 
-      - **Description**: This is the most complex utility. This function will determine if a left-to-right bridge exists.
-      - **Input**: An array of all `lines` and the `canvasDimensions`.
-      - **Output**: A boolean (`true` if a bridge exists, `false` otherwise). Optionally, it can also return the array of lines that form the path.
+      - **Description**: The simulation uses a highly efficient incremental algorithm to check for a bridge.
+      - **Input**: A new line and the existing set of lines.
+      - **Output**: A boolean indicating if a bridge has just been formed.
       - **High-Level Logic**:
-        1.  Identify two groups of lines: `left_starters` (lines touching the left edge) and `right_finishers` (lines touching the right edge).
-        2.  Build an adjacency list graph where each line is a node and an edge exists between two nodes if their corresponding lines intersect (using Task 4.1).
-        3.  Starting from every node in `left_starters`, perform a graph traversal (Breadth-First Search is a good choice).
-        4.  If the traversal ever reaches a node that is in the `right_finishers` group, a path exists. Return `true`.
-        5.  If all traversals complete without reaching a finisher, return `false`.
+        1.  A `UnionFind` data structure maintains sets of connected lines.
+        2.  When a new line is added, it is checked for intersections with existing lines.
+        3.  For each intersection, the `union` operation merges the sets of the two lines.
+        4.  A bridge is formed if a line touching the start boundary is found to be in the same set as a line touching the end boundary.
+        5.  This avoids rebuilding the entire graph and provides a significant performance improvement.
 
 -----
 
@@ -161,8 +161,8 @@ This project provides a solid foundation for exploring percolation theory, but t
 
 ### **Performance Optimizations**
 
-*   **Incremental Connectivity Checks**: The current `checkForBridge` function re-builds the entire graph and re-checks all intersections on every step (an O(n²) operation, where n is the number of lines). This can be optimized significantly:
-    *   **Union-Find Data Structure**: An ideal solution for this problem is to use a Union-Find (or Disjoint Set Union) data structure. Each line can be a node in the set. When a new line is added, check for intersections *only with existing lines*. For each intersection found, perform a `union` operation on the sets containing the two lines. A bridge is formed when a line touching the left boundary is in the same set as a line touching the right boundary.
+*   **Incremental Connectivity Checks**: The simulation has been optimized to avoid re-calculating the entire intersection graph at every step. Instead of an O(n²) check, it now uses an efficient incremental approach.
+    *   **Union-Find Data Structure**: The core of the optimization is a **Union-Find** (or Disjoint Set Union) data structure. Each line is a member of a set. When a new line is added, it's only checked for intersections against *existing* lines. When an intersection occurs, the sets of the two lines are merged. A bridge is formed the moment any line touching the starting boundary belongs to the same set as a line touching the finishing boundary. This makes the check nearly constant time on average for each new line.
     *   **Quadtrees**: For a very large number of lines, the intersection detection itself can be optimized by using a spatial partitioning data structure like a Quadtree. This would allow the simulation to quickly find which lines are near a new line, avoiding the need to check against every other line on the canvas.
 
 ### **Code Refinements & Robustness**
