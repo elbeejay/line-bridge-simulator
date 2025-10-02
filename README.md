@@ -10,7 +10,7 @@ A web-based simulation exploring concepts of percolation theory by randomly plac
 
 The **Line Bridge Simulator** is an interactive application that demonstrates a 2D percolation problem. The user defines a set of parameters—specifically, the permissible range for line **lengths** and **angles**.
 
-The simulation begins by randomly placing lines, one by one, onto a rectangular canvas. Each new line adheres to the user-defined parameters. After each placement, the simulation checks if a "bridge" has been formed. A bridge is a continuous, unbroken chain of intersecting lines that connects the **left boundary** of the canvas to the **right boundary**.
+The simulation begins by randomly placing lines, one by one, onto a rectangular canvas. Each new line adheres to the user-defined parameters. After each placement, the simulation checks if a "bridge" has been formed. A "bridge" is a continuous, unbroken chain of intersecting lines that connects two opposite sides of a designated area. The user can select the boundary condition, such as **left-to-right** or **top-to-bottom**.
 
 The simulation stops the moment a bridge is successfully formed. The primary output is the total **number of lines** required to achieve this connection. This project is designed with a highly modular architecture to allow different components (e.g., the simulation logic, the rendering engine, the user interface) to be developed and tested independently and in parallel.
 
@@ -18,6 +18,7 @@ The simulation stops the moment a bridge is successfully formed. The primary out
 
 ## ✨ Core Features
 
+  * **Boundary Condition Toggling**: Select the type of bridge to form, such as "Left to Right" or "Top to Bottom".
   * **Interactive Controls**: Sliders and input fields for setting the minimum/maximum line length and angle.
   * **Dynamic Simulation**: Watch lines being placed in real-time on an HTML canvas.
   * **State Controls**: Buttons to **Start**, **Stop/Pause**, and **Reset** the simulation.
@@ -160,7 +161,7 @@ This project provides a solid foundation for exploring percolation theory, but t
 
 ### **Feature Enhancements & Bugfixes**
 
-*   **Boundary Condition Toggling**: Allow the user to change the boundary conditions. For example, check for a bridge from top-to-bottom, or from a corner to the opposite corner.
+*   **Diagonal or Corner-to-Corner Bridges**: Extend the boundary condition options to include more complex scenarios, such as checking for a bridge from the top-left corner to the bottom-right corner.
 
 ### **Performance Optimizations**
 

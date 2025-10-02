@@ -12,7 +12,8 @@ class SimulationEngine {
             minLength: 10,
             maxLength: 50,
             minAngle: 0,
-            maxAngle: 360
+            maxAngle: 360,
+            boundaryCondition: 'left-to-right',
         };
 
         // Define the inner "bridge area" with a margin.
@@ -103,7 +104,7 @@ class SimulationEngine {
         this.clusters = findAllClusters(this.lines);
 
         // 4. Check if a bridge has been formed.
-        const bridgeResult = checkForBridge(this.lines, this.bridgeArea);
+        const bridgeResult = checkForBridge(this.lines, this.bridgeArea, this.simulationParameters.boundaryCondition);
 
         // 5. If a bridge exists, stop the simulation.
         if (bridgeResult.pathFound) {
