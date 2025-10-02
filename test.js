@@ -48,7 +48,10 @@ const bridgeLines = [
     { x1: 90, y1: 40, x2: 200, y2: 150 },   // Intersects with first
     { x1: 190, y1: 140, x2: BRIDGE_AREA.width, y2: 200 } // Intersects with second, touches right
 ];
-runTest('Test 6 (Connected Bridge)', checkForBridge(bridgeLines, BRIDGE_AREA).pathFound === true);
+// Test case 6: Simple connected bridge
+const bridgeResult = checkForBridge(bridgeLines, BRIDGE_AREA);
+runTest('Test 6 (Connected Bridge - Found)', bridgeResult.pathFound === true);
+runTest('Test 6 (Connected Bridge - Path)', JSON.stringify(bridgeResult.path) === JSON.stringify([0, 1, 2]));
 
 // Test case 7: No connected bridge
 const noBridgeLines = [
