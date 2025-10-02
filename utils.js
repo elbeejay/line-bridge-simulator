@@ -1,6 +1,69 @@
 // Module 4: Utility Modules
 // This file will contain pure, mathematical functions for the Line Bridge Simulator.
 
+/**
+ * A Union-Find (Disjoint Set Union) data structure.
+ * It's optimized with path compression and union by rank (or size) for near-constant time operations.
+ */
+class UnionFind {
+    constructor() {
+        // parent[i] stores the parent of element i
+        this.parent = {};
+        // size[i] stores the size of the set where i is the root
+        this.size = {};
+        this.elementCount = 0;
+    }
+
+    /**
+     * Adds a new element to the data structure as a new set.
+     */
+    add() {
+        const elementId = this.elementCount;
+        // A new element is its own parent, and its set size is 1.
+        this.parent[elementId] = elementId;
+        this.size[elementId] = 1;
+        this.elementCount++;
+    }
+
+    /**
+     * Finds the representative (or root) of the set containing an element.
+     * Implements path compression for optimization.
+     * @param {number} i - The element to find.
+     * @returns {number} - The representative of the set.
+     */
+    find(i) {
+        // If i is the root, its parent is itself.
+        if (this.parent[i] === i) {
+            return i;
+        }
+        // Path compression: set the parent of i directly to the root.
+        this.parent[i] = this.find(this.parent[i]);
+        return this.parent[i];
+    }
+
+    /**
+     * Merges the sets containing two elements.
+     * Implements union by size for optimization.
+     * @param {number} i - The first element.
+     * @param {number} j - The second element.
+     */
+    union(i, j) {
+        const rootI = this.find(i);
+        const rootJ = this.find(j);
+
+        if (rootI !== rootJ) {
+            // Union by size: attach the smaller tree to the root of the larger tree.
+            if (this.size[rootI] < this.size[rootJ]) {
+                this.parent[rootI] = rootJ;
+                this.size[rootJ] += this.size[rootI];
+            } else {
+                this.parent[rootJ] = rootI;
+                this.size[rootI] += this.size[rootJ];
+            }
+        }
+    }
+}
+
 // Task 4.1: Implement Line Segment Intersection Logic
 
 /**
@@ -69,172 +132,7 @@ function onSegment(p, q, r) {
 }
 
 
-// Task 4.2: Develop the Graph Connectivity Algorithm
-
-/**
- * Checks if a set of lines forms a bridge across a given area based on specified boundary conditions.
- * @param {Array<object>} lines - An array of line objects ({ x1, y1, x2, y2 }).
- * @param {object} bridgeArea - The area to check for a bridge within ({ x, y, width, height }).
- * @param {string} boundaryCondition - The type of bridge to check for ('left-to-right', 'top-to-bottom').
- * @returns {object} - An object with `pathFound` (boolean) and `path` (array of line indices).
- */
-function checkForBridge(lines, bridgeArea, boundaryCondition = 'left-to-right') {
-    if (lines.length === 0) {
-        return { pathFound: false, path: [] };
-    }
-
-    const starters = [];
-    const finishers = new Set();
-    const tolerance = 1e-9; // A small tolerance for floating-point comparisons to the edge.
-
-    // Define boundaries from the bridgeArea object
-    const leftBoundary = bridgeArea.x;
-    const rightBoundary = bridgeArea.x + bridgeArea.width;
-    const topBoundary = bridgeArea.y;
-    const bottomBoundary = bridgeArea.y + bridgeArea.height;
-
-    // Identify starter and finisher lines based on the boundary condition
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        let touchesStart = false;
-        let touchesFinish = false;
-
-        switch (boundaryCondition) {
-            case 'top-to-bottom':
-                touchesStart = line.y1 <= topBoundary + tolerance || line.y2 <= topBoundary + tolerance;
-                touchesFinish = line.y1 >= bottomBoundary - tolerance || line.y2 >= bottomBoundary - tolerance;
-                break;
-            case 'top-left-to-bottom-right':
-                const cornerTolerance = 15; // How close a line endpoint must be to the corner.
-                const topLeft = { x: leftBoundary, y: topBoundary };
-                const bottomRight = { x: rightBoundary, y: bottomBoundary };
-
-                const isNearPoint = (point, target, tol) => {
-                    return Math.sqrt(Math.pow(point.x - target.x, 2) + Math.pow(point.y - target.y, 2)) <= tol;
-                };
-
-                touchesStart = isNearPoint({ x: line.x1, y: line.y1 }, topLeft, cornerTolerance) || isNearPoint({ x: line.x2, y: line.y2 }, topLeft, cornerTolerance);
-                touchesFinish = isNearPoint({ x: line.x1, y: line.y1 }, bottomRight, cornerTolerance) || isNearPoint({ x: line.x2, y: line.y2 }, bottomRight, cornerTolerance);
-                break;
-            case 'left-to-right':
-            default: // Default to left-to-right for safety
-                touchesStart = line.x1 <= leftBoundary + tolerance || line.x2 <= leftBoundary + tolerance;
-                touchesFinish = line.x1 >= rightBoundary - tolerance || line.x2 >= rightBoundary - tolerance;
-                break;
-        }
-
-        if (touchesStart) {
-            starters.push(i);
-        }
-        if (touchesFinish) {
-            finishers.add(i);
-        }
-    }
-
-    if (starters.length === 0 || finishers.size === 0) {
-        return { pathFound: false, path: [] };
-    }
-
-    // Build the adjacency list for the graph of intersecting lines
-    const adj = new Map();
-    for (let i = 0; i < lines.length; i++) {
-        adj.set(i, []);
-    }
-    for (let i = 0; i < lines.length; i++) {
-        for (let j = i + 1; j < lines.length; j++) {
-            if (intersects(lines[i], lines[j])) {
-                adj.get(i).push(j);
-                adj.get(j).push(i);
-            }
-        }
-    }
-
-    // Perform a Breadth-First Search (BFS) to find a path
-    const queue = [...starters];
-    const visited = new Set(starters);
-    const parent = new Map(); // To reconstruct the path if one is found
-
-    while (queue.length > 0) {
-        const currentIndex = queue.shift();
-
-        // If a starter line is also a finisher line, a path is found.
-        if (finishers.has(currentIndex)) {
-            // --- Path Reconstruction ---
-            const path = [];
-            let current = currentIndex;
-            while (current !== undefined) {
-                path.unshift(current);
-                current = parent.get(current);
-            }
-            return { pathFound: true, path: path }; // Bridge found!
-        }
-
-        // Explore neighbors
-        const neighbors = adj.get(currentIndex);
-        for (const neighborIndex of neighbors) {
-            if (!visited.has(neighborIndex)) {
-                visited.add(neighborIndex);
-                parent.set(neighborIndex, currentIndex); // Keep track of the path
-                queue.push(neighborIndex);
-            }
-        }
-    }
-
-    return { pathFound: false, path: [] }; // No bridge found
-}
-
 // For Node.js testing
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { intersects, checkForBridge };
-}
-/**
- * Finds all connected components (clusters) in a set of lines.
- * @param {Array<object>} lines - An array of line objects.
- * @returns {Array<Array<number>>} - An array of clusters, where each cluster is an array of line indices.
- */
-function findAllClusters(lines) {
-    if (lines.length === 0) {
-        return [];
-    }
-
-    const adj = new Map();
-    for (let i = 0; i < lines.length; i++) {
-        adj.set(i, []);
-    }
-
-    for (let i = 0; i < lines.length; i++) {
-        for (let j = i + 1; j < lines.length; j++) {
-            if (intersects(lines[i], lines[j])) {
-                adj.get(i).push(j);
-                adj.get(j).push(i);
-            }
-        }
-    }
-
-    const allClusters = [];
-    const visited = new Set();
-
-    for (let i = 0; i < lines.length; i++) {
-        if (!visited.has(i)) {
-            const currentCluster = [];
-            const queue = [i];
-            visited.add(i);
-
-            while (queue.length > 0) {
-                const u = queue.shift();
-                currentCluster.push(u);
-
-                const neighbors = adj.get(u);
-                for (const v of neighbors) {
-                    if (!visited.has(v)) {
-                        visited.add(v);
-                        queue.push(v);
-                    }
-                }
-            }
-            allClusters.push(currentCluster);
-        }
-    }
-
-    return allClusters;
+    module.exports = { intersects, UnionFind };
 }
