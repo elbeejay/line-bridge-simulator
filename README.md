@@ -23,6 +23,7 @@ The simulation stops the moment a bridge is successfully formed. The primary out
   * **State Controls**: Buttons to **Start**, **Stop/Pause**, and **Reset** the simulation.
   * **Live Data Output**: A display showing the current count of placed lines.
   * **Result Reporting**: A clear final report stating the number of lines required to form the bridge.
+  * **Cluster Visualization**: All clusters of connected lines are rendered in unique colors, providing a rich, real-time view of the percolation process.
   * **(Optional) Highlighting**: The successful connecting path is highlighted in a distinct color upon completion.
 
 -----
@@ -159,7 +160,6 @@ This project provides a solid foundation for exploring percolation theory, but t
 
 ### **Feature Enhancements & Bugfixes**
 
-*   **Cluster Visualization**: Instead of only highlighting the final bridge, visualize all clusters of connected lines with different colors. This would give a much richer view of the percolation process.
 *   **Boundary Condition Toggling**: Allow the user to change the boundary conditions. For example, check for a bridge from top-to-bottom, or from a corner to the opposite corner.
 
 ### **Performance Optimizations**

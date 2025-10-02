@@ -63,8 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Highlight the final path if one was found.
         if (engine.connectingPath && engine.connectingPath.length > 0) {
-            const pathLines = engine.connectingPath.map(i => engine.lines[i]);
-            highlightPath(ctx, pathLines, 'blue');
+            // The connectingPath is now an array of line objects, not indices.
+            highlightPath(ctx, engine.connectingPath, 'blue');
         }
 
         animationFrameId = requestAnimationFrame(mainLoop);
