@@ -18,7 +18,7 @@ The simulation stops the moment a bridge is successfully formed. The primary out
 
 ## ✨ Core Features
 
-  * **Boundary Condition Toggling**: Select the type of bridge to form, such as "Left to Right" or "Top to Bottom".
+  * **Boundary Condition Toggling**: Select the type of bridge to form, such as "Left to Right", "Top to Bottom", and "Top-Left to Bottom-Right".
   * **Interactive Controls**: Sliders and input fields for setting the minimum/maximum line length and angle.
   * **Dynamic Simulation**: Watch lines being placed in real-time on an HTML canvas.
   * **State Controls**: Buttons to **Start**, **Stop/Pause**, and **Reset** the simulation.
@@ -158,10 +158,6 @@ Here are the specific, modular tasks required to build the simulator. They are g
 ## 🔬 Opportunities for Future Development
 
 This project provides a solid foundation for exploring percolation theory, but there are many opportunities for enhancement and further development. The following suggestions are grouped by category.
-
-### **Feature Enhancements & Bugfixes**
-
-*   **Diagonal or Corner-to-Corner Bridges**: Extend the boundary condition options to include more complex scenarios, such as checking for a bridge from the top-left corner to the bottom-right corner.
 
 ### **Performance Optimizations**
 

@@ -71,6 +71,25 @@ const leftOnlyLines = [
 ];
 runTest('Test 9 (Left-touching only)', checkForBridge(leftOnlyLines, BRIDGE_AREA).pathFound === false);
 
+// Test case 10: Corner-to-corner bridge
+const cornerBridgeLines = [
+    { x1: 5, y1: 5, x2: 100, y2: 100 },      // Near top-left corner
+    { x1: 90, y1: 90, x2: 200, y2: 200 },   // Intersects with first
+    { x1: 190, y1: 190, x2: 495, y2: 395 } // Intersects with second, near bottom-right
+];
+const cornerBridgeResult = checkForBridge(cornerBridgeLines, BRIDGE_AREA, 'top-left-to-bottom-right');
+runTest('Test 10 (Corner Bridge - Found)', cornerBridgeResult.pathFound === true);
+runTest('Test 10 (Corner Bridge - Path)', JSON.stringify(cornerBridgeResult.path) === JSON.stringify([0, 1, 2]));
+
+
+// Test case 11: No Corner-to-corner bridge
+const noCornerBridgeLines = [
+    { x1: 5, y1: 5, x2: 100, y2: 100 },      // Near top-left corner
+    { x1: 495, y1: 395, x2: 400, y2: 300 } // Near bottom-right, but no connection
+];
+runTest('Test 11 (No Corner Bridge)', checkForBridge(noCornerBridgeLines, BRIDGE_AREA, 'top-left-to-bottom-right').pathFound === false);
+
+
 if (failures > 0) {
     console.error(`\n${failures} test(s) failed.`);
     process.exit(1); // Exit with a failure code

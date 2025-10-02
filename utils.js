@@ -104,6 +104,18 @@ function checkForBridge(lines, bridgeArea, boundaryCondition = 'left-to-right') 
                 touchesStart = line.y1 <= topBoundary + tolerance || line.y2 <= topBoundary + tolerance;
                 touchesFinish = line.y1 >= bottomBoundary - tolerance || line.y2 >= bottomBoundary - tolerance;
                 break;
+            case 'top-left-to-bottom-right':
+                const cornerTolerance = 15; // How close a line endpoint must be to the corner.
+                const topLeft = { x: leftBoundary, y: topBoundary };
+                const bottomRight = { x: rightBoundary, y: bottomBoundary };
+
+                const isNearPoint = (point, target, tol) => {
+                    return Math.sqrt(Math.pow(point.x - target.x, 2) + Math.pow(point.y - target.y, 2)) <= tol;
+                };
+
+                touchesStart = isNearPoint({ x: line.x1, y: line.y1 }, topLeft, cornerTolerance) || isNearPoint({ x: line.x2, y: line.y2 }, topLeft, cornerTolerance);
+                touchesFinish = isNearPoint({ x: line.x1, y: line.y1 }, bottomRight, cornerTolerance) || isNearPoint({ x: line.x2, y: line.y2 }, bottomRight, cornerTolerance);
+                break;
             case 'left-to-right':
             default: // Default to left-to-right for safety
                 touchesStart = line.x1 <= leftBoundary + tolerance || line.x2 <= leftBoundary + tolerance;
