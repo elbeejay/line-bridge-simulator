@@ -159,3 +159,54 @@ function checkForBridge(lines, bridgeArea) {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { intersects, checkForBridge };
 }
+/**
+ * Finds all connected components (clusters) in a set of lines.
+ * @param {Array<object>} lines - An array of line objects.
+ * @returns {Array<Array<number>>} - An array of clusters, where each cluster is an array of line indices.
+ */
+function findAllClusters(lines) {
+    if (lines.length === 0) {
+        return [];
+    }
+
+    const adj = new Map();
+    for (let i = 0; i < lines.length; i++) {
+        adj.set(i, []);
+    }
+
+    for (let i = 0; i < lines.length; i++) {
+        for (let j = i + 1; j < lines.length; j++) {
+            if (intersects(lines[i], lines[j])) {
+                adj.get(i).push(j);
+                adj.get(j).push(i);
+            }
+        }
+    }
+
+    const allClusters = [];
+    const visited = new Set();
+
+    for (let i = 0; i < lines.length; i++) {
+        if (!visited.has(i)) {
+            const currentCluster = [];
+            const queue = [i];
+            visited.add(i);
+
+            while (queue.length > 0) {
+                const u = queue.shift();
+                currentCluster.push(u);
+
+                const neighbors = adj.get(u);
+                for (const v of neighbors) {
+                    if (!visited.has(v)) {
+                        visited.add(v);
+                        queue.push(v);
+                    }
+                }
+            }
+            allClusters.push(currentCluster);
+        }
+    }
+
+    return allClusters;
+}

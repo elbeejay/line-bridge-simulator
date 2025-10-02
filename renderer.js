@@ -44,10 +44,26 @@ function drawBridgeArea(ctx, bridgeArea) {
 }
 
 /**
+ * Generates a palette of visually distinct colors using the golden angle.
+ * @param {number} numColors The number of colors to generate.
+ * @returns {string[]} An array of HSL color strings.
+ */
+function generateColorPalette(numColors) {
+    const colors = [];
+    if (numColors === 0) return colors;
+    for (let i = 0; i < numColors; i++) {
+        // Use the golden angle approximation (137.5 degrees) to pick hues
+        const hue = (i * 137.508) % 360;
+        colors.push(`hsl(${hue}, 85%, 55%)`);
+    }
+    return colors;
+}
+
+/**
  * Renders the entire simulation state.
  * @param {CanvasRenderingContext2D} ctx The canvas rendering context.
  * @param {HTMLCanvasElement} canvas The canvas element.
- * @param {object} state The simulation state, containing the lines.
+ * @param {object} state The simulation state, containing lines and clusters.
  * @param {object} bridgeArea The area where the bridge is calculated.
  */
 function render(ctx, canvas, state, bridgeArea) {
@@ -61,10 +77,17 @@ function render(ctx, canvas, state, bridgeArea) {
     // 3. Draw the bridge area
     drawBridgeArea(ctx, bridgeArea);
 
-    // 4. Loop through the lines and draw each one
-    if (state && state.lines) {
-        state.lines.forEach(line => {
-            drawLine(ctx, line);
+    // 4. Draw all clusters with unique colors
+    if (state && state.clusters && state.lines) {
+        const colors = generateColorPalette(state.clusters.length);
+        state.clusters.forEach((cluster, clusterIndex) => {
+            const color = colors[clusterIndex % colors.length];
+            cluster.forEach(lineIndex => {
+                const line = state.lines[lineIndex];
+                if (line) {
+                    drawLine(ctx, line, color);
+                }
+            });
         });
     }
 }

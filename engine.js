@@ -39,6 +39,7 @@ class SimulationEngine {
         this.isRunning = false;
         this.lineCount = 0;
         this.connectingPath = [];
+        this.clusters = [];
     }
 
     /**
@@ -98,16 +99,18 @@ class SimulationEngine {
         this.lines.push(newLine);
         this.lineCount++;
 
-        // 3. Check if a bridge has been formed.
-        // This function will be defined in `utils.js`.
-        // The check can be computationally expensive, so we only run it when a new line is added.
+        // 3. Find all clusters of connected lines.
+        this.clusters = findAllClusters(this.lines);
+
+        // 4. Check if a bridge has been formed.
         const bridgeResult = checkForBridge(this.lines, this.bridgeArea);
 
-        // 4. If a bridge exists, stop the simulation.
+        // 5. If a bridge exists, stop the simulation.
         if (bridgeResult.pathFound) {
             this.isRunning = false;
-            // (Optional) Store the path for highlighting later.
-            this.connectingPath = bridgeResult.path;
+            // The path from `checkForBridge` is an array of indices.
+            // We map them to the actual line objects for rendering.
+            this.connectingPath = bridgeResult.path.map(index => this.lines[index]);
             console.log(`Bridge formed with ${this.lineCount} lines!`);
         }
     }
