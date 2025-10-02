@@ -72,49 +72,62 @@ function onSegment(p, q, r) {
 // Task 4.2: Develop the Graph Connectivity Algorithm
 
 /**
- * Checks if a set of lines forms a bridge from the left to the right side of a given area.
+ * Checks if a set of lines forms a bridge across a given area based on specified boundary conditions.
  * @param {Array<object>} lines - An array of line objects ({ x1, y1, x2, y2 }).
  * @param {object} bridgeArea - The area to check for a bridge within ({ x, y, width, height }).
+ * @param {string} boundaryCondition - The type of bridge to check for ('left-to-right', 'top-to-bottom').
  * @returns {object} - An object with `pathFound` (boolean) and `path` (array of line indices).
  */
-function checkForBridge(lines, bridgeArea) {
+function checkForBridge(lines, bridgeArea, boundaryCondition = 'left-to-right') {
     if (lines.length === 0) {
         return { pathFound: false, path: [] };
     }
 
-    const leftStarters = [];
-    const rightFinishers = new Set();
+    const starters = [];
+    const finishers = new Set();
+    const tolerance = 1e-9; // A small tolerance for floating-point comparisons to the edge.
 
+    // Define boundaries from the bridgeArea object
     const leftBoundary = bridgeArea.x;
     const rightBoundary = bridgeArea.x + bridgeArea.width;
+    const topBoundary = bridgeArea.y;
+    const bottomBoundary = bridgeArea.y + bridgeArea.height;
 
-    // A small tolerance is necessary for floating-point comparisons to the edge.
-    const tolerance = 1e-9;
-
+    // Identify starter and finisher lines based on the boundary condition
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-        // A line is a "starter" if one of its endpoints is on or very near the left edge.
-        const touchesLeft = line.x1 <= leftBoundary + tolerance || line.x2 <= leftBoundary + tolerance;
-        // A line is a "finisher" if one of its endpoints is on or very near the right edge.
-        const touchesRight = line.x1 >= rightBoundary - tolerance || line.x2 >= rightBoundary - tolerance;
+        let touchesStart = false;
+        let touchesFinish = false;
 
-        if (touchesLeft) {
-            leftStarters.push(i);
+        switch (boundaryCondition) {
+            case 'top-to-bottom':
+                touchesStart = line.y1 <= topBoundary + tolerance || line.y2 <= topBoundary + tolerance;
+                touchesFinish = line.y1 >= bottomBoundary - tolerance || line.y2 >= bottomBoundary - tolerance;
+                break;
+            case 'left-to-right':
+            default: // Default to left-to-right for safety
+                touchesStart = line.x1 <= leftBoundary + tolerance || line.x2 <= leftBoundary + tolerance;
+                touchesFinish = line.x1 >= rightBoundary - tolerance || line.x2 >= rightBoundary - tolerance;
+                break;
         }
-        if (touchesRight) {
-            rightFinishers.add(i);
+
+        if (touchesStart) {
+            starters.push(i);
+        }
+        if (touchesFinish) {
+            finishers.add(i);
         }
     }
 
-    if (leftStarters.length === 0 || rightFinishers.size === 0) {
+    if (starters.length === 0 || finishers.size === 0) {
         return { pathFound: false, path: [] };
     }
 
+    // Build the adjacency list for the graph of intersecting lines
     const adj = new Map();
     for (let i = 0; i < lines.length; i++) {
         adj.set(i, []);
     }
-
     for (let i = 0; i < lines.length; i++) {
         for (let j = i + 1; j < lines.length; j++) {
             if (intersects(lines[i], lines[j])) {
@@ -124,14 +137,16 @@ function checkForBridge(lines, bridgeArea) {
         }
     }
 
-    const queue = [...leftStarters];
-    const visited = new Set(leftStarters);
-    const parent = new Map(); // To reconstruct the path
+    // Perform a Breadth-First Search (BFS) to find a path
+    const queue = [...starters];
+    const visited = new Set(starters);
+    const parent = new Map(); // To reconstruct the path if one is found
 
     while (queue.length > 0) {
         const currentIndex = queue.shift();
 
-        if (rightFinishers.has(currentIndex)) {
+        // If a starter line is also a finisher line, a path is found.
+        if (finishers.has(currentIndex)) {
             // --- Path Reconstruction ---
             const path = [];
             let current = currentIndex;
@@ -142,11 +157,12 @@ function checkForBridge(lines, bridgeArea) {
             return { pathFound: true, path: path }; // Bridge found!
         }
 
+        // Explore neighbors
         const neighbors = adj.get(currentIndex);
         for (const neighborIndex of neighbors) {
             if (!visited.has(neighborIndex)) {
                 visited.add(neighborIndex);
-                parent.set(neighborIndex, currentIndex); // Set parent
+                parent.set(neighborIndex, currentIndex); // Keep track of the path
                 queue.push(neighborIndex);
             }
         }

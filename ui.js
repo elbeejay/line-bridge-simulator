@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const maxLengthInput = document.getElementById('max-length');
     const minAngleInput = document.getElementById('min-angle');
     const maxAngleInput = document.getElementById('max-angle');
+    const boundaryConditionInput = document.getElementById('boundary-condition');
 
     const minLengthSlider = document.getElementById('min-length-slider');
     const maxLengthSlider = document.getElementById('max-length-slider');
@@ -100,6 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
             maxLength: parseInt(maxLengthInput.value),
             minAngle: parseInt(minAngleInput.value),
             maxAngle: parseInt(maxAngleInput.value),
+            boundaryCondition: boundaryConditionInput.value,
         };
     }
 
@@ -134,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update engine parameters when any control changes
     [minLengthInput, maxLengthInput, minAngleInput, maxAngleInput,
-     minLengthSlider, maxLengthSlider, minAngleSlider, maxAngleSlider].forEach(input => {
+     minLengthSlider, maxLengthSlider, minAngleSlider, maxAngleSlider, boundaryConditionInput].forEach(input => {
         input.addEventListener('change', () => {
             engine.simulationParameters = getParametersFromUI();
         });
