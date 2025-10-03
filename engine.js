@@ -1,8 +1,14 @@
-// For Node.js testing, require dependencies. For browser, they are global.
+// Declare variables that will be populated based on the environment.
+let UnionFind, intersects;
+
+// For Node.js testing, require dependencies. For browser, they are assumed to be global.
 if (typeof module !== 'undefined' && module.exports) {
-    // Use const to avoid hoisting and polluting the global scope in any way.
-    const { UnionFind, intersects } = require('./utils.js');
+    // In Node.js, load from utils.js and assign to module-scoped variables.
+    const utils = require('./utils.js');
+    UnionFind = utils.UnionFind;
+    intersects = utils.intersects;
 }
+// In a browser environment, `UnionFind` and `intersects` are assumed to be in the global scope.
 
 // Module 1: 🧑‍💻 Simulation Engine (`engine.js`)
 
@@ -59,41 +65,140 @@ class SimulationEngine {
 
     /**
      * Generates a single random line that is guaranteed to be within the canvas boundaries.
-     * This is a private helper method for the simulation engine.
-     * @returns {{x1: number, y1: number, x2: number, y2: number}} A line object.
+     * This method is more robust than the previous trial-and-error approach. It calculates
+     * the valid angle ranges from a given point and picks an angle from there.
+     * @returns {{x1: number, y1: number, x2: number, y2: number}|null} A line object, or null if no valid line could be generated.
+     * @private
      */
     _generateRandomLine() {
-        const { minLength, maxLength, minAngle, maxAngle } = this.simulationParameters;
+        const { minLength, maxLength } = this.simulationParameters;
         const { width, height } = this.canvasDimensions;
+        const MAX_RETRIES = 50; // Try a few times to find a valid starting point.
 
-        let line;
-        let isLineInside = false;
-
-        // This loop can be inefficient if the parameters make it hard to find a valid line.
-        // For this project, we'll assume parameters that are reasonable.
-        while (!isLineInside) {
-            // 1. Pick a random angle and length
-            const angleDegrees = Math.random() * (maxAngle - minAngle) + minAngle;
-            const angleRadians = angleDegrees * (Math.PI / 180);
+        for (let i = 0; i < MAX_RETRIES; i++) {
+            // 1. Pick a random length and a starting point *inside* the canvas.
             const length = Math.random() * (maxLength - minLength) + minLength;
-
-            // 2. Pick a random starting point (x1, y1)
             const x1 = Math.random() * width;
             const y1 = Math.random() * height;
 
-            // 3. Calculate the end point (x2, y2) based on the angle and length
-            const x2 = x1 + length * Math.cos(angleRadians);
-            const y2 = y1 + length * Math.sin(angleRadians);
+            // 2. Calculate all valid angle ranges that keep the endpoint inside the canvas.
+            const validAngleRanges = this._getValidAngleRanges(x1, y1, length);
 
-            // 4. Check if the *entire line* is within the canvas boundaries
-            if (x1 >= 0 && x1 <= width && y1 >= 0 && y1 <= height &&
-                x2 >= 0 && x2 <= width && y2 >= 0 && y2 <= height) {
+            if (validAngleRanges.length > 0) {
+                // 3. Pick a random angle from the combined valid ranges.
+                const totalAngleSpan = validAngleRanges.reduce((sum, range) => sum + (range[1] - range[0]), 0);
+                let randomAngleSample = Math.random() * totalAngleSpan;
 
-                isLineInside = true;
-                line = { x1, y1, x2, y2 };
+                let chosenAngle;
+                for (const range of validAngleRanges) {
+                    const span = range[1] - range[0];
+                    if (randomAngleSample <= span + 1e-9) { // Add tolerance for float errors
+                        chosenAngle = range[0] + randomAngleSample;
+                        break;
+                    }
+                    randomAngleSample -= span;
+                }
+
+                // 4. Calculate the end point and return the line.
+                const x2 = x1 + length * Math.cos(chosenAngle);
+                const y2 = y1 + length * Math.sin(chosenAngle);
+                return { x1, y1, x2, y2 };
             }
         }
-        return line;
+
+        console.warn(`Could not generate a valid line after ${MAX_RETRIES} retries. The simulation may be impossible with the current parameters (e.g., line length is too large for the canvas).`);
+        return null;
+    }
+
+    /**
+     * Calculates the valid angle ranges for a line to remain within canvas boundaries.
+     * @param {number} x1 - The starting x-coordinate (must be within canvas).
+     * @param {number} y1 - The starting y-coordinate (must be within canvas).
+     * @param {number} length - The length of the line.
+     * @returns {Array<Array<number>>} A list of valid angle ranges in radians, e.g., [[start1, end1]].
+     * @private
+     */
+    _getValidAngleRanges(x1, y1, length) {
+        const { width, height } = this.canvasDimensions;
+        const { minAngle, maxAngle } = this.simulationParameters;
+        const PI2 = 2 * Math.PI;
+
+        // Helper to normalize an angle to the [0, 2*PI] range.
+        const normalize = angle => (angle % PI2 + PI2) % PI2;
+
+        // Helper to intersect two lists of [start, end] angle ranges.
+        const intersectRanges = (listA, listB) => {
+            const result = [];
+            let i = 0, j = 0;
+            while (i < listA.length && j < listB.length) {
+                const rA = listA[i];
+                const rB = listB[j];
+                const start = Math.max(rA[0], rB[0]);
+                const end = Math.min(rA[1], rB[1]);
+                if (start < end) {
+                    result.push([start, end]);
+                }
+                if (rA[1] < rB[1]) i++;
+                else j++;
+            }
+            return result;
+        };
+
+        // Helper to convert a single [min, max] user angle range (which can wrap) into a sorted list of simple [start, end] ranges.
+        const getInitialRanges = (min, max) => {
+            if (max - min >= 360) return [[0, PI2]];
+            const minRad = normalize(min * Math.PI / 180);
+            const maxRad = normalize(max * Math.PI / 180);
+            if (minRad <= maxRad) return [[minRad, maxRad]];
+            return [[0, maxRad], [minRad, PI2]];
+        };
+
+        let allowedRanges = getInitialRanges(minAngle, maxAngle);
+
+        // For each boundary, calculate the forbidden angle range and subtract it from the allowed ranges.
+        const boundaries = [
+            { val: x1, bound: 0, comp: Math.acos, flip: true },  // x >= 0
+            { val: x1, bound: width, comp: Math.acos, flip: false }, // x <= width
+            { val: y1, bound: 0, comp: Math.asin, flip: true },  // y >= 0
+            { val: y1, bound: height, comp: Math.asin, flip: false }  // y <= height
+        ];
+
+        for (const b of boundaries) {
+            const ratio = (b.bound - b.val) / length;
+            if (ratio >= 1) continue; // This boundary imposes no restriction
+            if (ratio <= -1) return []; // Impossible to satisfy this boundary
+
+            const angle = b.comp(ratio);
+            let forbidden;
+
+            if (b.comp === Math.acos) { // x-boundary
+                forbidden = b.flip ? [angle, PI2 - angle] : [0, angle, PI2 - angle, PI2];
+            } else { // y-boundary
+                const a1 = angle;
+                const a2 = Math.PI - angle;
+                forbidden = b.flip ? [normalize(a2), normalize(a1 + PI2)] : [a1, a2];
+            }
+
+            // Subtract the forbidden ranges from the allowed ranges
+            const nextAllowed = [];
+            for (const allowed of allowedRanges) {
+                let current = allowed[0];
+                for (let i = 0; i < forbidden.length; i += 2) {
+                    const f_start = forbidden[i];
+                    const f_end = forbidden[i+1];
+                    if (current < f_start) {
+                        nextAllowed.push([current, Math.min(allowed[1], f_start)]);
+                    }
+                    current = Math.max(current, f_end);
+                }
+                if (current < allowed[1]) {
+                    nextAllowed.push([current, allowed[1]]);
+                }
+            }
+            allowedRanges = nextAllowed;
+        }
+
+        return allowedRanges;
     }
 
     /**
@@ -107,6 +212,14 @@ class SimulationEngine {
 
         // 1. Generate a new line and add it to the state.
         const newLine = this._generateRandomLine();
+
+        // If generation fails (e.g., impossible parameters), stop the simulation.
+        if (!newLine) {
+            this.isRunning = false;
+            console.error("Stopping simulation: Could not generate a valid line with the given parameters.");
+            return;
+        }
+
         this.lines.push(newLine);
         const newLineIndex = this.lineCount;
         this.lineCount++;
