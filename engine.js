@@ -1,7 +1,11 @@
 // For Node.js testing, require dependencies. For browser, they are global.
+let UnionFind, intersects;
+
 if (typeof module !== 'undefined' && module.exports) {
-    // Use const to avoid hoisting and polluting the global scope in any way.
-    const { UnionFind, intersects } = require('./utils.js');
+    // In Node.js, require the dependencies from utils.js
+    const utils = require('./utils.js');
+    UnionFind = utils.UnionFind;
+    intersects = utils.intersects;
 }
 
 // Module 1: 🧑‍💻 Simulation Engine (`engine.js`)
