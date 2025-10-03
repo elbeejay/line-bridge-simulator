@@ -123,67 +123,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     resetButton.addEventListener('click', resetSimulation);
 
-    // --- Unified Input Syncing, Validation, and Parameter Updates ---
+    // Sync sliders and number inputs
+    const setupSliderSync = (slider, input) => {
+        slider.addEventListener('input', () => input.value = slider.value);
+        input.addEventListener('change', () => slider.value = input.value);
+    };
 
-    /**
-     * Sets up event listeners for a pair of min/max controls (e.g., min/max length).
-     * This single handler syncs sliders with number inputs, validates the min <= max
-     * constraint, and updates the slider's min/max attributes to prevent clamping issues.
-     * @param {HTMLElement} minInput  - The number input for the minimum value.
-     * @param {HTMLElement} maxInput  - The number input for the maximum value.
-     * @param {HTMLElement} minSlider - The range slider for the minimum value.
-     * @param {HTMLElement} maxSlider - The range slider for the maximum value.
-     */
-    function setupRangeControls(minInput, maxInput, minSlider, maxSlider) {
-        const controls = [minInput, maxInput, minSlider, maxSlider];
+    setupSliderSync(minLengthSlider, minLengthInput);
+    setupSliderSync(maxLengthSlider, maxLengthInput);
+    setupSliderSync(minAngleSlider, minAngleInput);
+    setupSliderSync(maxAngleSlider, maxAngleInput);
 
-        function handleInput(event) {
-            const source = event.target;
-
-            // Step 1: Sync the value from the source element to its pair (e.g., input -> slider).
-            if (source === minInput) minSlider.value = minInput.value;
-            else if (source === minSlider) minInput.value = minSlider.value;
-            else if (source === maxInput) maxSlider.value = maxInput.value;
-            else if (source === maxSlider) maxInput.value = maxSlider.value;
-
-            // Step 2: Get the integer values from the number inputs.
-            let minVal = parseInt(minInput.value);
-            let maxVal = parseInt(maxInput.value);
-
-            // Step 3: Enforce the min <= max constraint.
-            if (minVal > maxVal) {
-                if (source === minInput || source === minSlider) {
-                    // If a "min" control caused the violation, push "max" up.
-                    maxVal = minVal;
-                    maxInput.value = maxVal;
-                    maxSlider.value = maxVal;
-                } else {
-                    // If a "max" control caused the violation, pull "min" down.
-                    minVal = maxVal;
-                    minInput.value = minVal;
-                    minSlider.value = minVal;
-                }
-            }
-
-            // Step 4: Dynamically update the sliders' min/max attributes.
-            // This prevents the browser from clamping the values and makes the UI more intuitive.
-            minSlider.max = maxVal;
-            maxSlider.min = minVal;
-
-            // Step 5: Update the simulation engine with the validated parameters.
+    // Update engine parameters when any control changes
+    [minLengthInput, maxLengthInput, minAngleInput, maxAngleInput,
+     minLengthSlider, maxLengthSlider, minAngleSlider, maxAngleSlider, boundaryConditionInput].forEach(input => {
+        input.addEventListener('change', () => {
             engine.simulationParameters = getParametersFromUI();
-        }
-
-        controls.forEach(control => control.addEventListener('input', handleInput));
-    }
-
-    // Set up the handlers for both length and angle controls.
-    setupRangeControls(minLengthInput, maxLengthInput, minLengthSlider, maxLengthSlider);
-    setupRangeControls(minAngleInput, maxAngleInput, minAngleSlider, maxAngleSlider);
-
-    // The boundary condition dropdown is separate and only needs a simple listener.
-    boundaryConditionInput.addEventListener('change', () => {
-        engine.simulationParameters = getParametersFromUI();
+        });
     });
 
     // --- Initial Setup ---

@@ -168,7 +168,7 @@ This project provides a solid foundation for exploring percolation theory, but t
 ### **Code Refinements & Robustness**
 
 *   **Efficient Line Generation**: The `_generateRandomLine` method in `engine.js` uses a `while` loop that could be slow if the line length parameters are large relative to the canvas size. A more robust approach would be to first pick a random point *within a margin* of the canvas, then calculate the valid range of angles that would keep the line in-bounds, and finally pick a random angle from that valid range.
-*   **Input Validation**: The UI in `index.html` and `ui.js` has been updated to include input validation. For example, the minimum length is prevented from being greater than the maximum length.
+*   **Input Validation**: The UI in `index.html` and `ui.js` should be updated to include input validation. For example, prevent the minimum length from being greater than the maximum length.
 *   **Dependency Management**: For a larger project, explicitly list dependencies (even if just for testing, like Node.js) and consider using a package manager like npm to manage them.
 
 ### **Advanced Simulation Features**
