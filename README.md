@@ -16,6 +16,7 @@ The primary output is the total number of lines required to form the bridge. Thi
 *   **Live Data**: See the current line count and a final result message.
 *   **Cluster Visualization**: Connected line clusters are rendered in unique colors for a clear view of the process.
 *   **Path Highlighting**: The final connecting path is highlighted in a distinct color.
+*   **Statistical Analysis**: Run bulk simulations to calculate mean, median, min, and max results, available in both the UI and a headless script.
 
 ## Getting Started
 
@@ -42,6 +43,30 @@ The project includes a suite of tests for its core logic. The tests are run usin
     node test.js
     ```
 
+## Advanced Data Analysis
+
+The simulator includes tools for running a large number of simulations to gather statistical data on the number of lines required to form a bridge.
+
+### In-Browser Analysis
+You can run multiple simulations directly from the user interface:
+1.  In the "Statistical Analysis" section of the control panel, enter the desired number of runs.
+2.  Click the "Run Analysis" button.
+3.  The simulation will run in the background, and the UI will display progress. Once complete, the statistical results (mean, median, min, max) will be shown in the "Simulation Status" panel.
+
+### Headless (Command-Line) Analysis
+For running a very large number of simulations or for automated testing, you can use the headless script. This requires Node.js.
+
+1.  **Navigate to the project's root directory.**
+2.  **Run the script with an optional number of simulations:**
+    ```bash
+    # Run 100 simulations (default)
+    node headless.js
+
+    # Run 500 simulations
+    node headless.js 500
+    ```
+3.  The script will print the progress and display the final statistics in the terminal.
+
 ## Technical Architecture
 
 The application is built with vanilla JavaScript and is divided into four decoupled modules to ensure maintainability and separation of concerns:
@@ -57,5 +82,4 @@ This project provides a solid foundation for exploring percolation theory. Futur
 
 *   **Performance Optimizations**: Implement a Quadtree to optimize intersection detection for a very large number of lines.
 *   **Robust Line Generation**: Improve the line generation algorithm to more efficiently create lines that are guaranteed to be within the canvas, especially when parameters are restrictive.
-*   **Advanced Data Analysis**: Add a "headless" mode to run the simulation multiple times, log the results, and calculate statistics like the mean and median number of lines required for a connection.
 *   **UI Enhancements**: Add more robust input validation to prevent invalid parameter ranges (e.g., min length > max length).
